@@ -12,8 +12,8 @@ This repository provides the source code and data associated with our recent man
 The provided code was developed and tested with the following software versions:
 
 - **Python**: 3.9.7
-- **NumPy**: 1.24.3
 - **SciPy**: 1.7.1
+- **NumPy**: 1.24.3
 - **pandas**: 1.3.4
 - **statsmodels**: 0.12.2
 - **NetworkX**: 2.6.3
