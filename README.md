@@ -44,11 +44,11 @@ To reproduce the results presented in the manuscript, please execute the followi
 
 - **`Method_Fitting_Hi.ipynb`**: Illustrates the procedure used to fit the composite gradient employed in the model, utilizing experimental data.
 
-- **`Marmoset_Model_Timescale_Result.ipynb`**: Provides code and figures for all simulations and analyses of the hierarchical organization of timescales in the multi-regional model of the marmoset cortex.
+- **`Marmoset_Model_Timescale_Result.ipynb`**: Provides code and figures for all simulations and analyses of the timescale hierarchy in the multi-regional model of the marmoset cortex.
 
-- **`Marmoset_Model_FC.ipynb`**: Includes code and figures for simulations and analyses related to functional connectivity in the multi-regional marmoset cortical model.
+- **`Marmoset_Model_FC.ipynb`**: Includes code and figures for simulations and analyses related to functional connectivity in the multi-regional model of the marmoset cortex.
 
-- **`Marmoset_Model_Signal_Prop.ipynb`**: Contains code and figures for simulations and analyses related to signal propagation within the multi-regional marmoset cortical model.
+- **`Marmoset_Model_Signal_Prop.ipynb`**: Contains code and figures for simulations and analyses related to signal propagation within the multi-regional model of the marmoset cortex.
 
 ### Data Sources
 The experimental data analyzed in these notebooks are sourced from:
