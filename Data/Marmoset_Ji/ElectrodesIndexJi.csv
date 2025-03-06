@@ -1,0 +1,97 @@
+segment_num,segment_name,area_num,area_abb,area_name,hemisphere,R,A,S
+1,Segment_1,91,FST,Fundus of superior temporal sulcus area of cortex,Left,10.40880051,-2.893974818,0.855980292
+2,Segment_2,138,TPO,Temporo-parieto-occipital association area (superior temporal polysensory cortex),Left,10.40880051,-0.99397479,-0.844019733
+3,Segment_3,130,TE3,Temporal area TE3,Left,10.60880051,0.506025232,-2.64401976
+4,Segment_4,138,TPO,Temporo-parieto-occipital association area (superior temporal polysensory cortex),Left,10.1088005,1.906025253,-4.144019783
+5,Segment_5,128,TE1,Temporal area TE1,Left,9.108800486,3.206025273,-5.744019806
+6,Segment_6,126,STR,Superior temporal rostral  area,Left,9.208800487,4.906025298,-4.244019784
+7,Segment_7,83,AuRPB,Auditory cortex; rostral parabelt,Left,10.3088005,3.606025279,-2.744019762
+8,Segment_8,83,AuRPB,Auditory cortex; rostral parabelt,Left,10.80880051,2.106025256,-1.144019738
+9,Segment_9,76,AuAL,Auditory cortex; anterolateral area,Left,10.80880051,0.506025232,0.355980285
+10,Segment_10,97,MIP,Medial intraparietal area of cortex,Left,4.908800423,-3.593974829,8.055980399
+11,Segment_11,96,LIP,Lateral intrapartietal area of cortex,Left,7.008800454,-3.493974827,6.955980383
+12,Segment_12,110,PG,Parietal area PG,Left,8.508800477,-3.593974829,5.455980361
+13,Segment_13,148,V5,Visual area 5 (middle temporal area),Left,9.708800495,-3.593974829,3.655980334
+14,Segment_14,98,MST,Medial superior temporal area of cortex,Left,10.2088005,-3.69397483,1.755980305
+15,Segment_15,91,FST,Fundus of superior temporal sulcus area of cortex,Left,10.60880051,-3.893974833,-0.64401973
+16,Segment_16,130,TE3,Temporal area TE3,Left,11.10880052,-3.893974833,-3.044019766
+17,Segment_17,130,TE3,Temporal area TE3,Left,10.70880051,-1.293974794,-3.044019766
+18,Segment_18,138,TPO,Temporo-parieto-occipital association area (superior temporal polysensory cortex),Left,10.40880051,-1.493974797,-0.844019733
+19,Segment_19,80,AuML,Auditory cortex; middle lateral area,Left,10.0088005,-1.293974794,1.355980299
+20,Segment_20,77,AuCL,Auditory cortex; caudolateral area,Left,9.708800495,-1.293974794,3.355980329
+21,Segment_21,140,TPt,Temporoparietal transitional area,Left,8.208800472,-1.293974794,5.455980361
+22,Segment_22,109,PFG,Parietal area PFG,Left,7.008800454,-1.193974793,6.75598038
+23,Segment_23,106,PE,Parietal area PE,Left,4.908800423,-1.293974794,7.755980395
+24,Segment_24,28,A1/2,Areas 1 and 2 of cortex,Left,4.70880042,0.906025238,7.655980393
+25,Segment_25,108,PF,Parietal area PF,Left,6.908800453,1.00602524,6.655980378
+26,Segment_26,122,S2E,Secondary somatosensory cortex; external part,Left,8.308800474,1.00602524,5.255980358
+27,Segment_27,81,AuA1,Auditory cortex; primary area,Left,9.608800493,0.406025231,3.355980329
+28,Segment_28,81,AuA1,Auditory cortex; primary area,Left,10.40880051,-0.093974777,1.955980308
+29,Segment_29,80,AuML,Auditory cortex; middle lateral area,Left,10.3088005,-0.99397479,0.355980285
+30,Segment_30,130,TE3,Temporal area TE3,Left,10.60880051,-2.093974806,-1.744019747
+31,Segment_31,130,TE3,Temporal area TE3,Left,10.50880051,0.306025229,-2.944019765
+32,Segment_32,138,TPO,Temporo-parieto-occipital association area (superior temporal polysensory cortex),Left,10.2088005,2.506025262,-3.644019775
+33,Segment_33,126,STR,Superior temporal rostral  area,Left,9.40880049,4.206025288,-4.544019789
+34,Segment_34,126,STR,Superior temporal rostral  area,Left,9.708800495,5.106025301,-2.744019762
+35,Segment_35,85,AuRTL,Auditory cortex; rostrotemporal lateral area,Left,10.50880051,3.506025277,-1.94401975
+36,Segment_36,83,AuRPB,Auditory cortex; rostral parabelt,Left,10.80880051,1.306025244,-0.844019733
+37,Segment_37,82,AuR,Auditory cortex; rostral area,Left,10.50880051,2.106025256,0.955980293
+38,Segment_38,28,A1/2,Areas 1 and 2 of cortex,Left,9.608800493,2.806025267,2.75598032
+39,Segment_39,30,A3b,Area 3b of cortex (primary somatosensory),Left,8.408800475,3.106025271,4.555980347
+40,Segment_40,30,A3b,Area 3b of cortex (primary somatosensory),Left,6.608800448,3.00602527,5.955980368
+41,Segment_41,29,A3a,Area 3a of cortex (primary somatosensory),Left,4.408800416,2.906025268,7.055980384
+42,Segment_42,31,A4ab,Area 4 of cortex; parts a and b (primary motor),Left,4.108800411,5.006025299,6.355980374
+43,Segment_43,31,A4ab,Area 4 of cortex; parts a and b (primary motor),Left,5.908800438,5.106025301,5.155980356
+44,Segment_44,29,A3a,Area 3a of cortex (primary somatosensory),Left,8.008800469,5.306025304,3.655980334
+45,Segment_45,30,A3b,Area 3b of cortex (primary somatosensory),Left,9.308800489,5.106025301,2.05598031
+46,Segment_46,124,S2PR,Secondary somatosensory cortex; parietal rostral area,Left,9.808800496,4.706025295,-0.044019721
+47,Segment_47,118,ProM,Proisocortical motor region (precentral opercular cortex),Left,9.508800492,6.506025322,-0.944019735
+48,Segment_48,37,A6Vb,Area 6 of cortex; ventral; part b,Left,9.008800484,7.106025331,0.955980293
+49,Segment_49,36,A6Va,Area 6 of cortex; ventral; part a,Left,7.40880046,7.306025334,2.75598032
+50,Segment_50,34,A6DR,Area 6 of cortex; dorsorostral part,Left,5.408800431,7.106025331,4.255980343
+51,Segment_51,34,A6DR,Area 6 of cortex; dorsorostral part,Left,3.508800402,7.206025332,5.455980361
+52,Segment_52,40,A8b,Area 8b of cortex,Left,2.408800386,8.706025355,4.05598034
+53,Segment_53,38,A8aD,Area 8a of cortex; dorsal part,Left,4.508800417,9.106025361,2.955980323
+54,Segment_54,39,A8aV,Area 8a of cortex; ventral part,Left,6.808800451,9.606025368,1.955980308
+55,Segment_55,73,A47L,Area 47 (old 12) of cortex; lateral part,Left,8.008800469,9.506025366,0.155980282
+56,Segment_56,118,ProM,Proisocortical motor region (precentral opercular cortex),Left,7.40880046,8.306025349,-1.344019741
+57,Segment_57,74,A47M,Area 47 (old 12) of cortex; medial part,Left,5.408800431,9.106025361,-1.144019738
+58,Segment_58,43,A10,Area 10 of cortex,Left,4.508800417,11.9060254,-0.344019726
+59,Segment_59,73,A47L,Area 47 (old 12) of cortex; lateral part,Left,6.308800444,10.80602539,-0.144019723
+60,Segment_60,73,A47L,Area 47 (old 12) of cortex; lateral part,Left,6.00880044,11.6060254,0.855980292
+61,Segment_61,71,A46D,Area 46 of cortex; dorsal part,Left,3.808800407,11.00602539,1.855980307
+62,Segment_62,43,A10,Area 10 of cortex,Left,2.808800392,12.90602542,0.555980287
+63,Segment_63,42,A9,Area 9 of cortex,Left,0.508800358,12.10602541,1.255980298
+64,Segment_64,42,A9,Area 9 of cortex,Left,1.508800372,10.60602538,2.855980322
+65,Segment_65,145,V3A,Visual area 3A (dorsoanterior area),Left,4.608800419,-6.093974866,8.255980402
+66,Segment_66,149,V6,Visual area 6 (dorsomedial area),Left,4.208800413,-8.293974899,7.855980396
+67,Segment_67,143,V2,Visual area 2,Left,3.808800407,-10.49397493,7.355980389
+68,Segment_68,143,V2,Visual area 2,Left,3.608800404,-12.39397496,6.555980377
+69,Segment_69,142,V1,Visual area 1,Left,3.408800401,-14.39397499,5.655980363
+70,Segment_70,142,V1,Visual area 1,Left,3.308800399,-16.09397501,4.455980346
+71,Segment_71,142,V1,Visual area 1,Left,5.508800432,-15.49397501,3.755980335
+72,Segment_72,142,V1,Visual area 1,Left,7.508800462,-14.69397499,2.75598032
+73,Segment_73,143,V2,Visual area 2,Left,9.108800486,-13.49397498,1.555980302
+74,Segment_74,144,V3,Visual area 3 (ventrolateral posterior area),Left,10.0088005,-11.69397495,0.155980282
+75,Segment_75,146,V4,Visual area 4 (ventrolatereral anterior area),Left,10.40880051,-9.69397492,-1.444019742
+76,Segment_76,146,V4,Visual area 4 (ventrolatereral anterior area),Left,10.60880051,-8.693974905,0.555980287
+77,Segment_77,144,V3,Visual area 3 (ventrolateral posterior area),Left,10.1088005,-10.39397493,2.05598031
+78,Segment_78,143,V2,Visual area 2,Left,9.108800486,-12.09397496,3.355980329
+79,Segment_79,142,V1,Visual area 1,Left,7.708800465,-13.39397497,4.555980347
+80,Segment_80,142,V1,Visual area 1,Left,5.608800434,-14.19397499,5.355980359
+81,Segment_81,143,V2,Visual area 2,Left,5.708800435,-12.19397496,5.955980368
+82,Segment_82,143,V2,Visual area 2,Left,6.00880044,-10.69397493,7.055980384
+83,Segment_83,51,A19DI,Area 19 of cortex; dorsointermediate part,Left,6.408800445,-8.3939749,7.255980387
+84,Segment_84,96,LIP,Lateral intrapartietal area of cortex,Left,6.70880045,-5.993974864,7.255980387
+85,Segment_85,100,OPt,Occipito-parietal transitional area of cortex,Left,8.408800475,-6.093974866,5.855980366
+86,Segment_86,144,V3,Visual area 3 (ventrolateral posterior area),Left,8.208800472,-8.3939749,5.655980363
+87,Segment_87,51,A19DI,Area 19 of cortex; dorsointermediate part,Left,8.008800469,-10.49397493,5.655980363
+88,Segment_88,143,V2,Visual area 2,Left,7.508800462,-12.69397496,5.255980358
+89,Segment_89,144,V3,Visual area 3 (ventrolateral posterior area),Left,9.40880049,-10.39397493,3.855980337
+90,Segment_90,146,V4,Visual area 4 (ventrolatereral anterior area),Left,9.608800493,-8.193974897,4.05598034
+91,Segment_91,146,V4,Visual area 4 (ventrolatereral anterior area),Left,10.40880051,-8.193974897,1.855980307
+92,Segment_92,130,TE3,Temporal area TE3,Left,10.90880051,-4.893974848,-5.044019796
+93,Segment_93,130,TE3,Temporal area TE3,Left,11.10880052,-5.293974854,-2.844019763
+94,Segment_94,91,FST,Fundus of superior temporal sulcus area of cortex,Left,10.70880051,-5.593974859,-0.444019727
+95,Segment_95,148,V5,Visual area 5 (middle temporal area),Left,10.40880051,-5.793974862,1.955980308
+96,Segment_96,147,V4T,Visual area 4; transitional part,Left,9.708800495,-6.093974866,3.855980337
