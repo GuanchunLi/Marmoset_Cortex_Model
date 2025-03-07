@@ -13,12 +13,15 @@ The provided code was developed and tested with the following software versions:
 
 - **Python**: 3.9.7
 - **SciPy**: 1.7.1
-- **NumPy**: 1.24.3
+- **NumPy**: 1.22.4
 - **pandas**: 1.3.4
 - **statsmodels**: 0.12.2
 - **NetworkX**: 2.6.3
 - **NeuroDSP**: 2.1.0
 - **FOOOF**: 1.1.0
+- **seaborn**: 0.13.2
+- **openpyxl**: 3.0.9
+- **scikit-learn**: 0.24.2
 
 ### Operating System
 - The software has been thoroughly tested on **Windows 11**.
