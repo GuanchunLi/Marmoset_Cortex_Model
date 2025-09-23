@@ -22,6 +22,8 @@ The provided code was developed and tested with the following software versions:
 - **seaborn**: 0.13.2
 - **openpyxl**: 3.0.9
 - **scikit-learn**: 0.24.2
+- **joblib**: 1.1.0
+- **matplotlib**: 3.4.3
 
 ### Operating System
 - The software has been thoroughly tested on **Windows 11**.
