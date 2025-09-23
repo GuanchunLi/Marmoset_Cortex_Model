@@ -55,6 +55,10 @@ To reproduce the results presented in the manuscript, please execute the followi
 
 - **`Marmoset_Model_Signal_Prop.ipynb`**: Contains code and figures for simulations and analyses related to signal propagation within the multi-regional model of the marmoset cortex.
 
+- **`Marmoset_Model_Delay.ipynb`**: Contains code and figures for simulations and analyses related to the multi-regional model of the marmoset cortex incorporating explicit axonal conduction delays.
+
+- **`Marmoset_Exp_Timescale_Awake.ipynb`**: Contains code and figures for the analysis of timescales based on marmoset ECoG experimental data during the awake resting state.
+
 ### Data Sources
 The experimental data analyzed in these notebooks are sourced from:
 

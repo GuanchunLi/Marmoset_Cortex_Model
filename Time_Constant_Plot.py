@@ -16,7 +16,7 @@ import neurodsp as ndsp
 from fooof import FOOOFGroup
 from neurodsp import spectral
 from fooof import FOOOF
-import echo_utils
+# import echo_utils
 import pandas as pd
 
 from sklearn.manifold import SpectralEmbedding
