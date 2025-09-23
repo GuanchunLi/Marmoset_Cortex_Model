@@ -16,17 +16,20 @@ import neurodsp as ndsp
 from fooof import FOOOFGroup
 from neurodsp import spectral
 from fooof import FOOOF
+import echo_utils
 import pandas as pd
 
 from sklearn.manifold import SpectralEmbedding
 from scipy import stats
 
 # from mapalign import dist, embed
+# import Brain_Areas_Embedding as BAE
 import pre_functions_clean as pf
 import time_constant_shuffle_FLN as tc
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import seaborn as sns
+from statsmodels.tsa.stattools import acf
 
 
 def convert_knee_val(knee, exponent=2.):
@@ -41,6 +44,41 @@ def compute_psds(data, fs=1000.):
     # f_axis, psd_mean = spectral.compute_spectrum(data, fs, avg_type='median', nperseg=fs*2)
     psds_reg = np.log10(psd_mean)
     return f_axis, psds_reg
+
+
+def compute_acf_matrix(X, nlags=None):
+    """
+    Compute the autocorrelation for each row in X.
+    
+    Parameters
+    ----------
+    X : np.ndarray
+        Input data of shape (m, n). Each row is a time series of length n.
+    nlags : int, optional
+        Number of lags to compute for the ACF. By default, it is set to n-1
+        (the maximum possible lag) for each row.
+        
+    Returns
+    -------
+    acf_matrix : np.ndarray
+        A matrix of ACF values for each row. If nlags is None or n-1, the
+        resulting array will have shape (m, n). Otherwise, shape (m, nlags+1).
+    """
+    m, n = X.shape
+    if nlags is None:
+        nlags = n - 1  # maximum number of lags
+
+    # Compute ACF for each row, up to 'nlags' lags, and collect results
+    acf_values = []
+    for i in range(m):
+        # statsmodels' acf returns a 1D array of autocorrelations up to lag=nlags
+        row_acf = acf(X[i, :], nlags=nlags, fft=True)
+        acf_values.append(row_acf)
+    
+    # Stack the list of ACF arrays into a single 2D array
+    acf_matrix = np.vstack(acf_values)
+    return acf_matrix
+
 
 def compute_tau(f_axis, psds_reg, fit_range=[0,100],max_n_peaks=2, fs=1000.):
     # plt_inds = np.arange(fit_range[0],fit_range[1]+1)
@@ -216,6 +254,58 @@ def plot_dynamics(p, r_exc, r_inh, I_stim_exc, area_stim_idx, area_name_list, t_
     f.text(0.01, 0.5, 'Change in firing rate (Hz)', va='center', rotation='vertical', size=20)
     ax.set_xlabel('Time (ms)', fontsize=20) 
     return f
+
+
+
+def plot_dynamics_cmp(p, r_exc, r_exc2, I_stim_exc, area_stim_idx, area_name_list, t_plot, PULSE_INPUT):
+    area_idx_list=[-1]
+    clist = cm.get_cmap(plt.get_cmap('rainbow'))(np.linspace(0.0, 1.0, p['n_area']))[np.newaxis, :, :3]
+    for name in area_name_list:
+        area_idx_list=area_idx_list+[p['areas'].index(name)]
+    f, ax_list = plt.subplots(len(area_idx_list), sharex=True, figsize=(12, 12), facecolor=(1, 1, 1))
+
+    # clist = cm.get_cmap(plt.get_cmap('Blues'))(np.linspace(0.0, 1.0, len(area_idx_list)))[np.newaxis, :, :3]
+    for ax, area_idx in zip(ax_list, area_idx_list):
+        if area_idx < 0:
+            y_plot = I_stim_exc[:, area_stim_idx].copy()
+            y2_plot = np.zeros_like(y_plot)
+            txt = 'Input'
+            color = 'k'
+        else:
+            y_plot = r_exc[:,area_idx].copy()
+            y2_plot = r_exc2[:,area_idx].copy()
+            txt = p['areas'][area_idx]
+            color = clist[0][area_idx]
+
+        if PULSE_INPUT:
+            y_plot = y_plot - y_plot.min()
+            # y_plot = y_plot - 10
+            y2_plot = y2_plot - y2_plot.min()
+            ax.plot(t_plot, y_plot,color=color, linewidth=1.5)
+            ax.plot(t_plot, y2_plot,'--',color=color, linewidth=1.5)
+        else:
+            #ax.plot(t_plot, y_plot,color='r')
+            ax.plot(t_plot, y_plot,color=color, linewidth=1)
+            ax.plot(t_plot, y2_plot,'--',color=color, linewidth=1)
+            # ax.plot(t_plot[0:10000], y_plot[-1-10000:-1],color=color, linewidth=2)
+            # ax.plot(t_plot[0:10000], z_plot[-1-10000:-1],'--',color='b')
+
+        # ax.plot(t_plot, y_plot,color=clist[0][c_color])
+        # ax.plot(t_plot, z_plot,'--',color=clist[0][c_color])
+        # c_color=c_color+1
+        ax.text(0.9, 0.6, txt, transform=ax.transAxes, size=20)
+        # Hide the top and right spines
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+
+        # Make the bottom and left spines thicker
+        ax.spines['bottom'].set_linewidth(2)
+        ax.spines['left'].set_linewidth(2)
+
+    f.text(0.01, 0.5, 'Change in firing rate (Hz)', va='center', rotation='vertical', size=20)
+    ax.set_xlabel('Time (ms)', fontsize=20) 
+    return f
+
 
 
 

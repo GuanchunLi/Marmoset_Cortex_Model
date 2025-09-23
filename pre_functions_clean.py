@@ -2399,6 +2399,400 @@ def run_stimulus_osc(p_t,VISUAL_INPUT=1,TOTAL_INPUT=0,T=6000,PULSE_INPUT=0,OSC_I
         # return max_rate
 
 
+def run_stimulus_delay(p_t, VISUAL_INPUT=1, TOTAL_INPUT=0, T=6000, PULSE_INPUT=1,
+                 MACAQUE_CASE=1, GATING_PATHWAY=0, CONSENSUS_CASE=0,
+                 stim_area='V1', plot_Flag=1):
+    """
+    Firing-rate model simulation with inter-areal temporal delays.
+
+    p_t must include:
+      - 'n_area' : number of areas
+      - 'areas'  : list of area names
+      - 'fln_mat': NxN connectivity (for excitatory) 
+      - 'delay_mat': NxN matrix of delays (ms) from area j to i
+      - local_EE, local_EI, local_IE, local_II, tau_exc, tau_inh, etc.
+        (same as in the non-delayed version)
+
+    The main difference is we now incorporate:
+      - local delay for intra-areal connections (fixed at 2 ms).
+      - inter-area delay from 'delay_mat'.
+    """
+    
+    # Copy parameters
+    p = p_t.copy()
+    
+    # For convenience
+    n_area = p['n_area']
+    area_names = p['areas']
+    
+    # Decide which area is stimulated
+    if VISUAL_INPUT:
+        area_act = stim_area  # e.g. 'V1'
+    else:
+        if MACAQUE_CASE:
+            area_act = '2'
+        else:
+            area_act = 'AuA1'
+    print('Running network with stimulation to ' + area_act
+          + '   PULSE_INPUT=' + str(PULSE_INPUT)
+          + '   MACAQUE_CASE=' + str(MACAQUE_CASE))
+
+    # ----------------------------------------------------------------------
+    # Redefine parameters (same as before, but keep them for clarity)
+    # ----------------------------------------------------------------------
+    local_EE = p['beta_exc'] * p['wEE'] * p['local_exc_scale']
+    local_EI = -p['beta_exc'] * p['wEI'] * np.ones_like(local_EE)
+    local_IE = p['beta_inh'] * p['wIE'] * p['local_inh_scale']
+    local_II = -p['beta_inh'] * p['wII'] * np.ones_like(local_EE)
+
+    fln_scaled = (p['exc_scale'] * p['fln_mat'].T).T
+    fln_scaled_inh = (p['inh_scale'] * p['fln_mat'].T).T
+    
+    # ----------------------------------------------------------------------
+    # Delays setup
+    # ----------------------------------------------------------------------
+    dt = 0.05  # ms
+    local_delay_ms = 2.0    # local E->E, E->I, I->E, I->I delay (analogous to the LIF case)
+    local_delay_steps = int(local_delay_ms / dt)  # number of time-steps for local delay
+
+    # Convert the delay matrix to integer time steps
+    # p['delay_mat'] is expected to be an NxN matrix with delays in ms
+    E_delay_steps = (p['delay_mat'] / dt).astype(int)
+
+    # Set diagonal = local delay (like 'self.E_delay_steps[i,i] = intra_delay_step')
+    np.fill_diagonal(E_delay_steps, local_delay_steps)
+
+    # The maximum delay we might have to look up
+    max_delay_steps = E_delay_steps.max()
+
+
+    # Pre-generate indexing arrays for vectorized delayed lookups
+    #   idxs[i_area, j_area] = the ring-buffer index for r_exc from area j_area 
+    #   that arrives in area i_area at time t.
+    #
+    # We'll compute:  ring_index = ( (i_t - 1) - E_delay_steps ) % (max_delay_steps + 1 )
+    # and then gather r_exc_buf[ ring_index[i_area, j_area], j_area ] in one shot.
+    ii, jj = np.indices((n_area, n_area))  # shape (n_area, n_area)
+
+    # ----------------------------------------------------------------------
+    # Simulation time
+    # ----------------------------------------------------------------------
+    if PULSE_INPUT:
+        Tsim = T
+    else:
+        Tsim = T
+    
+    t_plot = np.linspace(0, Tsim, int(Tsim/dt) + 1)
+    n_t = len(t_plot)
+
+    # ----------------------------------------------------------------------
+    # Background activity & background input
+    # ----------------------------------------------------------------------
+    r_exc_base = 10.0
+    r_inh_base = 35.0
+
+    r_exc_tgt = r_exc_base * np.ones(n_area)
+    r_inh_tgt = r_inh_base * np.ones(n_area)
+
+    # Because of how we define them, we'll keep the same background input logic
+    longrange_E_0 = np.dot(fln_scaled, r_exc_tgt)
+    longrange_I_0 = np.dot(fln_scaled_inh, r_exc_tgt)
+
+    I_bkg_exc = r_exc_tgt - (local_EE*r_exc_tgt + local_EI*r_inh_tgt
+                             + p['beta_exc']*p['muEE']*longrange_E_0)
+    I_bkg_inh = r_inh_tgt - (local_IE*r_exc_tgt + local_II*r_inh_tgt
+                             + p['beta_inh']*p['muIE']*longrange_I_0)
+
+    # ----------------------------------------------------------------------
+    # Set up stimulus input
+    # ----------------------------------------------------------------------
+    I_stim_exc = np.zeros((n_t, n_area))
+
+    area_stim_idx = area_names.index(area_act)
+
+    if PULSE_INPUT:
+        # Stim from t=200ms to t=400ms (example)
+        time_idx = (t_plot > 200) & (t_plot <= 400)
+        I_stim_exc[time_idx, area_stim_idx] = 41.187
+    else:
+        # example: random noise vs. targeted noise
+        if TOTAL_INPUT:
+            for i in range(n_area):
+                I_stim_exc[:, i] = gaussian_noise(0, 1e-5, n_t)
+        else:
+            for i in range(n_area):
+                I_stim_exc[:, i] = gaussian_noise(0, 1e-5, n_t)
+            # slightly stronger random noise in the stimulated area
+            I_stim_exc[:, area_stim_idx] = gaussian_noise(0, 0.5, n_t)
+
+    # ----------------------------------------------------------------------
+    # Prepare storage arrays for rate
+    # ----------------------------------------------------------------------
+    r_exc = np.zeros((n_t, n_area))
+    r_inh = np.zeros((n_t, n_area))
+
+    # Initialize the network with background rates
+    r_exc[0, :] = r_exc_tgt
+    r_inh[0, :] = r_inh_tgt
+
+    # ----------------------------------------------------------------------
+    # Prepare ring buffers for delayed activity
+    # ----------------------------------------------------------------------
+    # We'll store excitatory and inhibitory rates for up to max_delay_steps + 1
+    r_exc_buf = r_exc_tgt * np.ones((max_delay_steps+1, n_area))
+    r_inh_buf = r_inh_tgt * np.ones((max_delay_steps+1, n_area))
+
+    # Place initial conditions in the buffer
+    r_exc_buf[0, :] = r_exc[0, :]
+    r_inh_buf[0, :] = r_inh[0, :]
+
+    # A simple rectifying function
+    def fI(x):
+        return np.where(x > 0, x, 0.0)
+
+    # ----------------------------------------------------------------------
+    # Run the simulation
+    # ----------------------------------------------------------------------
+    for i_t in range(1, n_t):
+        # Current index in ring buffer
+        idx_now = (i_t - 1) % (max_delay_steps + 1)
+
+        # 1) Put the (just-finished) excitatory/inhibitory rates into ring buffer
+        r_exc_buf[idx_now, :] = r_exc[i_t-1, :]
+        r_inh_buf[idx_now, :] = r_inh[i_t-1, :]
+
+         # 1) Local delayed rates (intra-area)
+        idx_local = ((i_t - 1) - local_delay_steps) % (max_delay_steps + 1)
+        r_exc_local_delayed = r_exc_buf[idx_local, :]
+        r_inh_local_delayed = r_inh_buf[idx_local, :]
+
+        # 2) Inter-areal delayed excitatory input:
+        #
+        #    For area i_area, we want contributions from area j_area's excitatory
+        #    firing at time (i_t - 1 - E_delay_steps[i_area, j_area]).
+        #
+        #    We'll compute the ring-buffer indices for all pairs (i_area, j_area) at once.
+        ring_index = ((i_t - 1) - E_delay_steps) % (max_delay_steps + 1)
+        # gather all delayed excitatory rates in shape (n_area, n_area)
+        #   r_exc_all_delayed[i_area, j_area] = r_exc_buf[ ring_index[i_area, j_area], j_area ]
+        r_exc_all_delayed = r_exc_buf[ring_index, jj]  # advanced indexing
+
+        # multiply by fln_scaled or fln_scaled_inh and sum over j_area
+        longrange_E = np.sum(fln_scaled * r_exc_all_delayed, axis=1)
+        longrange_I = np.sum(fln_scaled_inh * r_exc_all_delayed, axis=1)
+
+        # # For each area i, we need the sum of E from all other areas j at their respective delays
+        # longrange_E = np.zeros(n_area)
+        # longrange_I = np.zeros(n_area)
+
+        # for i_area in range(n_area):
+        #     # gather the excitatory rates from all j at the appropriate delay steps
+        #     tmp_sum_E = 0.0
+        #     tmp_sum_I = 0.0
+        #     for j_area in range(n_area):
+        #         # how many steps to look back for the j->i connection
+        #         d_ij = E_delay_steps[i_area, j_area]
+        #         idx_delayed = ((i_t - 1) - d_ij) % (max_delay_steps + 1)
+        #         r_exc_j_delayed = r_exc_buf[idx_delayed, j_area]
+
+        #         # excitatory part (for E or I) uses r_exc_j_delayed
+        #         tmp_sum_E += fln_scaled[i_area, j_area] * r_exc_j_delayed
+        #         tmp_sum_I += fln_scaled_inh[i_area, j_area] * r_exc_j_delayed
+
+        #     longrange_E[i_area] = tmp_sum_E
+        #     longrange_I[i_area] = tmp_sum_I
+
+        # 3) Combine for total excitatory / inhibitory input
+        I_exc = (local_EE * r_exc_local_delayed
+                 + local_EI * r_inh_local_delayed
+                 + p['beta_exc'] * p['muEE'] * longrange_E
+                 + I_bkg_exc
+                 + I_stim_exc[i_t, :])
+
+        I_inh = (local_IE * r_exc_local_delayed
+                 + local_II * r_inh_local_delayed
+                 + p['beta_inh'] * p['muIE'] * longrange_I
+                 + I_bkg_inh)
+
+
+        # Example gating pathway logic (unchanged, but now acts on delayed rates if needed)
+        if GATING_PATHWAY:
+            d_local_EI = np.zeros_like(local_EI)
+            if MACAQUE_CASE and VISUAL_INPUT:
+                area_name_list = ['V4', '8m']  # example
+            else:
+                area_name_list = []
+            
+            for name in area_name_list:
+                area_idx = area_names.index(name)
+                # reduce E->I or something
+                d_local_EI[area_idx] = -local_EI[area_idx] * 0.07
+
+            # If stimulus is above threshold, modulate
+            if I_stim_exc[i_t, area_stim_idx] > 10:
+                I_exc += d_local_EI * r_inh_local_delayed
+
+        # Euler update
+        d_r_exc = -r_exc[i_t-1, :] + fI(I_exc)
+        d_r_inh = -r_inh[i_t-1, :] + fI(I_inh)
+
+        r_exc[i_t, :] = r_exc[i_t-1, :] + (d_r_exc * dt / p['tau_exc'])
+        r_inh[i_t, :] = r_inh[i_t-1, :] + (d_r_inh * dt / p['tau_inh'])
+
+    # Finally, put the last time point’s data into the buffer if you need
+    idx_now = (n_t - 1) % (max_delay_steps + 1)
+    r_exc_buf[idx_now, :] = r_exc[n_t - 1, :]
+    r_inh_buf[idx_now, :] = r_inh[n_t - 1, :]
+
+    #---------------------------------------------------------------------------------
+    # Plotting step input results
+    #---------------------------------------------------------------------------------
+    if CONSENSUS_CASE==0:
+        if MACAQUE_CASE:
+            if VISUAL_INPUT:
+                area_name_list = ['V1','V4','8m','8l','TEO','7A','9/46d','TEpd','24c']
+            else:
+                area_name_list = ['5','2','F1','10','9/46v','9/46d','F5','7B','F2','ProM','F7','8B','24c']
+        else:
+            if VISUAL_INPUT:
+                area_name_list = ['V1','V2','V4','MST','LIP','PG','A23a','A6DR','A6Va']
+            else:
+                area_name_list = ['AuA1','A1-2','V1','V2','V4','MST','LIP','PG','A23a','A6DR','A6Va']
+    else:
+        if MACAQUE_CASE:
+            if VISUAL_INPUT:
+                area_name_list = ['V1','V4','8m 8l 8r','5','TEO TEOm','F4','9/46d 46d','TEpd TEa/ma TEa/mp','F7']
+            else:
+                raise SystemExit('Must give Visual input to networks under consensus map!')
+                
+        else:
+            if VISUAL_INPUT:
+                area_name_list = ['V1','V2','V4','PEC PE','LIP','PGM','A32 A32V','A6DR','A6Va A6Vb']
+            else:
+                raise SystemExit('Must give Visual input to networks under consensus map!')
+                
+    max_rate=np.max(r_exc-r_exc_base,axis=0)
+    decay_time=np.zeros(p['n_area'])
+    if plot_Flag:
+        area_idx_list=[-1]
+        for name in area_name_list:
+            area_idx_list=area_idx_list+[p['areas'].index(name)]
+        #area_idx_list = [-1]+[p['areas'].index(name) for name in area_name_list]
+        
+        f, ax_list = plt.subplots(len(area_idx_list), sharex=True, figsize=(12, 12))
+        
+        clist = cm.get_cmap(plt.get_cmap('Blues'))(np.linspace(0.0, 1.0, len(area_idx_list)))[np.newaxis, :, :3]
+        c_color=0
+        for ax, area_idx in zip(ax_list, area_idx_list):
+            if area_idx < 0:
+                y_plot = I_stim_exc[:, area_stim_idx].copy()
+                z_plot = np.zeros_like(y_plot)
+                txt = 'Input'
+
+            else:
+                y_plot = r_exc[:,area_idx].copy()
+                z_plot = r_inh[:,area_idx].copy()
+                txt = p['areas'][area_idx]
+
+            if PULSE_INPUT:
+                y_plot = y_plot - y_plot.min()
+                # y_plot = y_plot - 10
+                z_plot = z_plot - z_plot.min()
+                ax.plot(t_plot, y_plot,color='k', linewidth=3)
+                #ax.plot(t_plot, z_plot,'--',color='b')
+            else:
+                #ax.plot(t_plot, y_plot,color='r')
+                ax.plot(t_plot[0:10000], y_plot[-1-10000:-1],color='r', linewidth=2)
+                # ax.plot(t_plot[0:10000], z_plot[-1-10000:-1],'--',color='b')
+                
+            # ax.plot(t_plot, y_plot,color=clist[0][c_color])
+            # ax.plot(t_plot, z_plot,'--',color=clist[0][c_color])
+            c_color=c_color+1
+            ax.text(0.9, 0.6, txt, transform=ax.transAxes, size=18)
+
+            if PULSE_INPUT:
+                ax.set_yticks([0,y_plot.max()])
+                # ax.set_yticklabels([0,'{:0.4f}'.format(y_plot.max()),'{:0.4f}'.format(z_plot.max())])
+                ax.set_yticklabels([0,'{:0.4f}'.format(y_plot.max())], fontsize=18)
+            ax.spines["right"].set_visible(False)
+            ax.spines["top"].set_visible(False)
+            #ax.xaxis.set_ticks_position('bottom')
+            ax.yaxis.set_ticks_position('left')
+            plt.xticks(fontsize=18)
+
+        f.text(0.01, 0.5, 'Change in firing rate (Hz)', va='center', rotation='vertical', size=18)
+        ax.set_xlabel('Time (ms)', fontsize=18)    
+        
+        if PULSE_INPUT:
+            clist = cm.get_cmap(plt.get_cmap('rainbow'))(np.linspace(0.0, 1.0, p['n_area']))[np.newaxis, :, :3]
+            plt.figure(figsize=(12, 8))
+            posi_array=np.arange(np.size(time_idx))
+            get_posi=posi_array[time_idx]
+            get_posi=get_posi[-1]
+            t_plot_cut = t_plot[get_posi:-1].copy()
+            c_color=0
+            for area_idx in np.arange(p['n_area']):
+                # if area_idx < 0:
+                #     continue
+                # else:
+                y_plot_cut = r_exc[get_posi:-1,area_idx].copy()- r_exc[:,area_idx].min()
+                y_plot_cut=y_plot_cut/y_plot_cut.max()
+                plt.plot(t_plot_cut, y_plot_cut,color=clist[0][c_color])
+                c_color=c_color+1
+            plt.xticks(fontsize=18)
+            plt.yticks(fontsize=18)
+            plt.xlabel('Time (ms)', fontsize=18)
+
+            decay_time=np.zeros(p['n_area'])
+            # fig,(ax1,ax2)=plt.subplots(2,1,figsize=(10,20))
+            fig, ax=plt.subplots(figsize=(15,10))
+            posi_array=np.arange(np.size(time_idx))
+            get_posi=posi_array[time_idx]
+            get_posi=get_posi[-1]
+            t_plot_cut = t_plot[get_posi:-1].copy()-t_plot[get_posi]
+            clist = cm.get_cmap(plt.get_cmap('rainbow'))(np.linspace(0.0, 1.0, p['n_area']))[np.newaxis, :, :3]
+            c_color=0
+            for area_idx in np.arange(p['n_area']):
+                y_plot_cut = r_exc[get_posi:-1,area_idx].copy()- r_exc[:,area_idx].min()
+                y_plot_cut=y_plot_cut/y_plot_cut.max()
+                # ax1.plot(t_plot_cut, y_plot_cut,color=clist[0][c_color])
+                p_end=np.where(y_plot_cut>1/np.e)[0][-1]
+                decay_time[c_color]=p_end*dt
+                c_color=c_color+1
+            
+            # ax1.set_xlabel('time (ms)')
+            # ax1.set_ylabel('normalized response')
+            
+    
+            ax.bar(np.arange(len(p['areas'])),decay_time,width = 1,color=clist[0])
+            ax.set_xticks(np.arange(len(p['areas'])))
+            ax.set_xticklabels(p['areas'],rotation=90, fontsize=16)
+            ax.set_yscale('log')
+            plt.yticks([10,100,1000],['10 ms','100 ms','1 s'],rotation=0, fontsize=20)
+            ax.set_ylabel('Decay time (ms)',fontsize=20)
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+        else:
+            decay_time=np.zeros(p['n_area']) 
+        
+        max_rate=np.max(r_exc-r_exc_base,axis=0)
+        # network_graph_plot(p,max_rate,MACAQUE_CASE=MACAQUE_CASE)
+        
+        fig,ax=plt.subplots(figsize=(15,10))
+        ax.plot(np.arange(len(p['areas'])), max_rate,'-o')
+        ax.set_xticks(np.arange(len(p['areas'])))
+        ax.set_xticklabels(p['areas'],rotation=90,fontsize=16)
+        ax.set_yscale('log')
+        ax.set_ylabel('Max Firing Rate',fontsize=16)
+        # ax.set_xlabel('hierarchy values')
+
+    if plot_Flag:
+        return I_stim_exc, r_exc, r_inh, area_stim_idx, dt, t_plot, decay_time, max_rate, f
+    else:
+        return I_stim_exc, r_exc, r_inh, area_stim_idx, dt, t_plot, decay_time, max_rate
+
+
+
 #run simulation of netowrk responses with current input also reported    
 def run_stimulus_wi_input(p_t,VISUAL_INPUT=1,TOTAL_INPUT=0,T=6000,PULSE_INPUT=1,MACAQUE_CASE=1,GATING_PATHWAY=0,CONSENSUS_CASE=0, stim_area='V1',plot_Flag=0):
         
