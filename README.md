@@ -4,7 +4,7 @@
 
 ## Overview
 
-This repository provides the source code and data associated with our recent manuscript. It includes executable Jupyter notebooks and auxiliary Python functions necessary for reproducing all analyses, simulations, and figures presented in the manuscript.
+This repository provides the source code and data associated with our manuscript "*A hierarchy of time constants and reliable signal propagation in the marmoset cerebral cortex*". It includes executable Jupyter notebooks and auxiliary Python functions necessary for reproducing all analyses, simulations, and figures presented in the manuscript.
 
 ## 1. System Requirements
 
